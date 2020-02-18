@@ -72,4 +72,4 @@ Note: the variable shown by the `SHOW...` command will not change, I think becau
 [Link](./TODO.md) to current to do list
 
 ### Live API
-[This link](https://api.byx1a2gixtvvnjwxde5y.com/) is a live API being used by the [ReactJS PWA]() as of 02/17/2020
+[This link](https://api.byx1a2gixtvvnjwxde5y.com/) is a live API being used by the [ReactJS PWA](https://github.com/codeforkansascity/tagging-tracker-pwa) as of 02/17/2020
