@@ -5,8 +5,11 @@ The structure is pretty basic, the `index.js` file detects if it is live/if that
 
 ### Routes
 `/login-user`
+
 `/upload-tag`
+
 `/sync-up`
+
 `/sync-down`
 
 ## Dependencies
