@@ -28,7 +28,7 @@ const getRecentSyncId = (userId) => {
 const getAddressesFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address, lat, lng, created, updated FROM addresses WHERE sync_id = ? ORDER BY id`, // limit? no pagination in mind
+            `SELECT address, lat, lng, created, updated FROM addresses WHERE sync_id = ? ORDER BY id LIMIT 6`, // need to paginate client side
             [syncId],
             (err, res) => {
                 if (err) {
@@ -49,7 +49,7 @@ const getAddressesFromRecentSync = (syncId) => {
 const getTagsFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, thumbnail_src, public_s3_url, meta FROM tags WHERE sync_id = ? ORDER BY id`,
+            `SELECT address_id, thumbnail_src, public_s3_url, meta FROM tags WHERE sync_id = ? ORDER BY id LIMIT 6`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -59,12 +59,13 @@ const getTagsFromRecentSync = (syncId) => {
                     if (res.length) {
                         // convert binary to base64
                         resolve(res.map((tagRow) => {
+                            console.log(tagRow.thumbnail_src);
                             const tagMeta = JSON.parse(tagRow.meta);
                             return {
                                 name: tagMeta.name,
                                 address_id: tagRow.address_id,
                                 // this has to match how it was saved i.e. in sync-up.js or uplaodTags.js
-                                thumbnail_src: generateBase64FromBinaryBuffer(tagRow.thumbnail_src),
+                                thumbnail_src: tagRow.thumbnail_src,
                                 meta: tagRow.meta // stringify client side
                             };
                         }));
@@ -80,7 +81,7 @@ const getTagsFromRecentSync = (syncId) => {
 const getOwnerInfoFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, form_data FROM owner_info WHERE sync_id = ? ORDER BY id`,
+            `SELECT address_id, form_data FROM owner_info WHERE sync_id = ? ORDER BY id LIMIT 6`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -101,7 +102,7 @@ const getOwnerInfoFromRecentSync = (syncId) => {
 const getTagInfoFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, form_data FROM tag_info WHERE sync_id = ? ORDER BY id`,
+            `SELECT address_id, form_data FROM tag_info WHERE sync_id = ? ORDER BY id LIMIT 6`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -126,6 +127,7 @@ const syncDown = async (req, res) => {
     } else {
         const bundledData = {};
         bundledData['addresses'] = await getAddressesFromRecentSync(syncId);
+        // need to pair up what was pulled from addresses side with data below
         bundledData['tags'] = await getTagsFromRecentSync(syncId);
         bundledData['ownerInfo'] = await getOwnerInfoFromRecentSync(syncId);
         bundledData['tagInfo'] = await getTagInfoFromRecentSync(syncId);

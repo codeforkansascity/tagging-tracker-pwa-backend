@@ -97,18 +97,18 @@ const insertTags = async (userId, syncId, tags) => {
 
         // insert
         // this structure does not exactly match Dexie i.e. Dexie has the extra fileName column used for deletion on client side
-        // create buffer for thumbnail src
-        const thumbnailBuff = generateBuffer(tagRow.thumbnail_src.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+        const thumbnailBlobUrl = tagRow.thumbnail_src;
+        console.log(thumbnailBlobUrl);
         pool.query(
             `INSERT INTO tags SET user_id = ?, address_id = ?, src = ?, thumbnail_src = ?,  public_s3_url= ?, meta = ?, sync_id = ?`,
-            [userId, tagRow.addressId, buff, thumbnailBuff, s3PublicUrl, JSON.stringify(tagRow.meta), syncId],
+            [userId, tagRow.addressId, buff, thumbnailBlobUrl, s3PublicUrl, JSON.stringify(tagRow.meta), syncId],
             (err, qres) => {
                 if (err) {
-                    console.log('insert tags', err);
                     insertErr = true;
-                    throw Error(false);
+                    throw Error(false); // max_allowed_packet can cause this to fail eg. ECONNRESET, set to 1GB by MYSQL
                 } else {
                     if (i === tags.length - 1) {
+                        console.log('end loop');
                         return true;
                     }
                 }
