@@ -158,6 +158,48 @@ const insertTagInfos = async (userId, syncId, tagInfos) => {
     );
 }
 
+/**
+ * these are the "non-promises" eg. I don't think await does anything
+ * or maybe I have it backwards, the nested promises were redundant, can't remember
+ * 
+ * this is decision right here, I COULD write a set of asyncs that deletes every row per table...
+ * but I can just delete the addresses and leave the technically useless rows that are no longer bound to an address
+ * what you can have is a background queue/job that deletes unused rows... which can open up other problems eg. "ACID"
+ * but it's arguable it would take much longer to delte the rows per addresses eg. tags/taginfo/etc... vs. just deleting address rows
+ * in the grand scheme performance wise and error-wise this is negligible, every sync is specifically tied/to all the data and MySQL I believe only
+ * has performance issues in the millions of rows
+ *
+ * also if these were just ids I wouldn't have to loop... I could juse use IN
+ * but the IndexedDB table does not directly line up with the ids here(they're not related at all)
+ */
+const deleteAddresses = async (userId, syncId, deletedAddresses) => {
+    const addressesToDeleteCnt = deletedAddresses.length;
+    let deletedAddressesCnt = 0;
+
+    // recursive delete
+    const deleteAddress = () => {
+        if (deletedAddresses <= addressesToDeleteCnt) {
+            pool.query(
+                `DELETE from addresses WHERE userId = ? AND address = ? AND sync_id = ?`,
+                [userId, deletedAddresses[deletedAddressesCnt], sync_id], // lol
+                (err, qres) => {
+                    if (err) {
+                        console.log('delete address', err);
+                        throw Error(false);
+                    } else {
+                        deletedAddressesCnt += 1;
+                        deleteAddress();
+                    }
+                }
+            );
+        } else {
+            return true;
+        }
+    }
+
+    deleteAddress();
+}
+
 const syncUp = async (req, res) => {
     // somehow req.token is available though sent from body
     const userId = await getUserIdFromToken(req.token);
@@ -180,6 +222,10 @@ const syncUp = async (req, res) => {
 
         if (!syncErr && typeof dataToSync.tagInfo !== "undefined") {
             syncErr = await insertTagInfos(userId, syncId, dataToSync.tagInfo);
+        }
+
+        if (!syncErr && typeof dataToSync.deletedAddresses !== "undefined") {
+            syncErr = await deleteAddresses(userId, syncId, dataToSync.addresses);
         }
 
         if (syncErr) {
