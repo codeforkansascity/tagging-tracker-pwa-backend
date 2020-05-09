@@ -49,7 +49,7 @@ const getAddressesFromRecentSync = (syncId) => {
 const getTagsFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, thumbnail_src, public_s3_url, meta FROM tags WHERE sync_id = ? ORDER BY id`,
+            `SELECT address_id, thumbnail_src, public_s3_url, meta, date_time FROM tags WHERE sync_id = ? ORDER BY id`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -65,7 +65,8 @@ const getTagsFromRecentSync = (syncId) => {
                                 address_id: tagRow.address_id,
                                 // this has to match how it was saved i.e. in sync-up.js or uplaodTags.js
                                 thumbnail_src: generateBase64FromBinaryBuffer(tagRow.thumbnail_src),
-                                meta: tagRow.meta // stringify client side
+                                meta: tagRow.meta, // stringify client side
+                                datetime: tagRow.date_time
                             };
                         }));
                     } else {
