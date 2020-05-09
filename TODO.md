@@ -9,6 +9,7 @@
 
 ### Database
 - [ ] make sure table seeding works from scratch
+- [ ] update migrations(lack of) some tables changed in schema, some of the seed definitions are now rong eg. `tags` table
 
 ### Extra
 - [ ] determine max connection limit for MySQL based on RAM/buffer/etc calculations

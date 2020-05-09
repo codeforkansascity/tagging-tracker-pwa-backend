@@ -100,8 +100,8 @@ const insertTags = async (userId, syncId, tags) => {
         // create buffer for thumbnail src
         const thumbnailBuff = generateBuffer(tagRow.thumbnail_src.replace(/^data:image\/\w+;base64,/, ""), 'base64');
         pool.query(
-            `INSERT INTO tags SET user_id = ?, address_id = ?, src = ?, thumbnail_src = ?,  public_s3_url= ?, meta = ?, sync_id = ?`,
-            [userId, tagRow.addressId, buff, thumbnailBuff, s3PublicUrl, JSON.stringify(tagRow.meta), syncId],
+            `INSERT INTO tags SET user_id = ?, address_id = ?, src = ?, thumbnail_src = ?,  public_s3_url= ?, meta = ?, sync_id = ?, date_time = ?`, // ehh date_time
+            [userId, tagRow.addressId, buff, thumbnailBuff, s3PublicUrl, JSON.stringify(tagRow.meta), syncId, tagRow.datetime],
             (err, qres) => {
                 if (err) {
                     console.log('insert tags', err);
