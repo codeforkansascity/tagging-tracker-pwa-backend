@@ -46,10 +46,39 @@ const getAddressesFromRecentSync = (syncId) => {
     });
 }
 
+const getEventsFromRecentSync = (syncId) => {
+    return new Promise(resolve => {
+        pool.query(
+            `SELECT address_id, tag_info_id, tag_ids, date_time FROM events WHERE sync_id = ? ORDER BY id`,
+            [syncId],
+            (err, res) => {
+                if (err) {
+                    console.log('sync down get events', err);
+                    resolve(false);
+                } else {
+                    if (res.length) {
+                        // convert binary to base64
+                        resolve(res.map((eventRow) => {
+                            return {
+                                address_id: eventRow.address_id,
+                                tag_info_id: eventRow.tag_info_id,
+                                tag_ids: eventRow.tag_ids,
+                                date_time: eventRow.date_time
+                            };
+                        }));
+                    } else {
+                        resolve(false);
+                    }
+                }
+            }
+        );
+    });
+}
+
 const getTagsFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, thumbnail_src, public_s3_url, meta, date_time FROM tags WHERE sync_id = ? ORDER BY id`,
+            `SELECT file_name, address_id, event_id, thumbnail_src, public_s3_url, meta, date_time FROM tags WHERE sync_id = ? ORDER BY id`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -61,8 +90,10 @@ const getTagsFromRecentSync = (syncId) => {
                         resolve(res.map((tagRow) => {
                             const tagMeta = JSON.parse(tagRow.meta);
                             return {
+                                file_name: tagRow.file_name,
                                 name: tagMeta.name,
                                 address_id: tagRow.address_id,
+                                event_id: tagRow.event_id,
                                 // this has to match how it was saved i.e. in sync-up.js or uplaodTags.js
                                 thumbnail_src: generateBase64FromBinaryBuffer(tagRow.thumbnail_src),
                                 meta: tagRow.meta, // stringify client side
@@ -102,7 +133,7 @@ const getOwnerInfoFromRecentSync = (syncId) => {
 const getTagInfoFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, form_data FROM tag_info WHERE sync_id = ? ORDER BY id`,
+            `SELECT address_id, event_id, form_data FROM tag_info WHERE sync_id = ? ORDER BY id`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -127,6 +158,7 @@ const syncDown = async (req, res) => {
     } else {
         const bundledData = {};
         bundledData['addresses'] = await getAddressesFromRecentSync(syncId);
+        bundledData['events'] = await getEventsFromRecentSync(syncId);
         bundledData['tags'] = await getTagsFromRecentSync(syncId);
         bundledData['ownerInfo'] = await getOwnerInfoFromRecentSync(syncId);
         bundledData['tagInfo'] = await getTagInfoFromRecentSync(syncId);
