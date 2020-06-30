@@ -100,8 +100,8 @@ const insertTags = async (userId, syncId, tags) => {
         // create buffer for thumbnail src
         const thumbnailBuff = generateBuffer(tagRow.thumbnail_src.replace(/^data:image\/\w+;base64,/, ""), 'base64');
         pool.query(
-            `INSERT INTO tags SET user_id = ?, address_id = ?, src = ?, thumbnail_src = ?,  public_s3_url= ?, meta = ?, sync_id = ?, date_time = ?`, // ehh date_time
-            [userId, tagRow.addressId, buff, thumbnailBuff, s3PublicUrl, JSON.stringify(tagRow.meta), syncId, tagRow.datetime],
+            `INSERT INTO tags SET user_id = ?, file_name = ?, address_id = ?, event_id = ?, src = ?, thumbnail_src = ?,  public_s3_url= ?, meta = ?, date_time = ?, sync_id = ?`, // ehh date_time
+            [userId, tagRow.fileName, tagRow.addressId, tagRow.eventId, buff, thumbnailBuff, s3PublicUrl, JSON.stringify(tagRow.meta), tagRow.datetime, syncId],
             (err, qres) => {
                 if (err) {
                     console.log('insert tags', err);
@@ -141,15 +141,35 @@ const insertTagInfos = async (userId, syncId, tagInfos) => {
     // insert
     // this structure does not exactly match Dexie i.e. Dexie has the extra fileName column used for deletion on client side
     pool.query(
-        `INSERT INTO tag_info (user_id, address_id, form_data, sync_id) VALUES ?`,
+        `INSERT INTO tag_info (user_id, address_id, event_id, form_data, sync_id) VALUES ?`,
         [
             tagInfos.map(tagInfoRow => (
-                [userId, tagInfoRow.addressId, JSON.stringify(tagInfoRow.formData), syncId]
+                [userId, tagInfoRow.addressId, tagInfoRow.eventId, JSON.stringify(tagInfoRow.formData), syncId]
             ))
         ],
         (err, qres) => {
             if (err) {
                 console.log('insert tagInfo', err);
+                throw Error(false);
+            } else {
+                return true;
+            }
+        }
+    );
+}
+
+const insertEvents = async (userId, syncId, events) => {
+    // tag_ids is an array in string form
+    pool.query(
+        `INSERT INTO events (user_id, address_id, tag_info_id, tag_ids, date_time, sync_id) VALUES ?`,
+        [
+            events.map(eventsRow => (
+                [userId, eventsRow.addressId, eventsRow.tagInfoId, JSON.stringify(eventsRow.tagIds), eventsRow.datetime, syncId]
+            ))
+        ],
+        (err, qres) => {
+            if (err) {
+                console.log('insert event', err);
                 throw Error(false);
             } else {
                 return true;
@@ -222,6 +242,10 @@ const syncUp = async (req, res) => {
 
         if (!syncErr && typeof dataToSync.tagInfo !== "undefined") {
             syncErr = await insertTagInfos(userId, syncId, dataToSync.tagInfo);
+        }
+
+        if (!syncErr && typeof dataToSync.events !== "undefined") {
+            syncErr = await insertEvents(userId, syncId, dataToSync.events);
         }
 
         if (!syncErr && typeof dataToSync.deletedAddresses !== "undefined") {
