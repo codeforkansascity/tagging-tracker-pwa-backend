@@ -161,7 +161,7 @@ const insertTagInfos = async (userId, syncId, tagInfos) => {
 const insertEvents = async (userId, syncId, events) => {
     // tag_ids is an array in string form
     pool.query(
-        `INSERT INTO events (user_id, address_id, tag_info_id, tag_ids, date_time, sync_id) VALUES ?`,
+        `INSERT INTO events (user_id, address_id, tag_info_id, tag_ids, datetime, sync_id) VALUES ?`,
         [
             events.map(eventsRow => (
                 [userId, eventsRow.addressId, eventsRow.tagInfoId, JSON.stringify(eventsRow.tagIds), eventsRow.datetime, syncId]

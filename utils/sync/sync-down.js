@@ -49,7 +49,7 @@ const getAddressesFromRecentSync = (syncId) => {
 const getEventsFromRecentSync = (syncId) => {
     return new Promise(resolve => {
         pool.query(
-            `SELECT address_id, tag_info_id, tag_ids, date_time FROM events WHERE sync_id = ? ORDER BY id`,
+            `SELECT address_id, tag_info_id, tag_ids, datetime FROM events WHERE sync_id = ? ORDER BY id`,
             [syncId],
             (err, res) => {
                 if (err) {
@@ -63,7 +63,7 @@ const getEventsFromRecentSync = (syncId) => {
                                 address_id: eventRow.address_id,
                                 tag_info_id: eventRow.tag_info_id,
                                 tag_ids: eventRow.tag_ids,
-                                date_time: eventRow.date_time
+                                date_time: eventRow.datetime
                             };
                         }));
                     } else {
