@@ -2,6 +2,7 @@ require('dotenv').config()
 const { getUserIdFromToken } = require('./../users/userFunctions');
 const { pool } = require('./../../utils/db/dbConnect');
 const { uploadToS3 } = require('./../../utils/s3/uploadTag');
+const { getDateTime } = require('./../../utils/datetime/functions');
 
 // import s3 stuff from module later
 const AWS = require('aws-sdk');
@@ -12,13 +13,18 @@ const s3 = new AWS.S3({apiVersion: '2006-03-01'});
 // TODO: add resize image option for thumbnail jimp is possibilty
 // BLOB has max size of 64KB
 const addImageToDatabase = async (userId, imageData, imagePublicS3Url) => {
+    const imgCopy = imageData;
+    imgCopy.eventId = 999999999; // this is a lazy fix, since some of these columns aren't even needed, upload isn't the same as sync
+    imgCopy.datetime = getDateTime();
     return new Promise(resolve => {
         // turn image into binary from base64
         const buff = new Buffer.from(imageData.src, 'base64');
+        const thumbnailBuff = '';
+        const syncId = 999999999;
         // thumbnail_src not supplied here since sync/save to device does the canvas rescale(client side)
         pool.query(
-            `INSERT INTO tags SET user_id = ?, address_id = ?, src = ?, thumbnail_src = ?, public_s3_url = ?, meta = ?, sync_id = ?`,
-            [userId, imageData.addressId, buff, "", imagePublicS3Url, JSON.stringify(imageData.meta), 0], // no sync id on uploads
+            `INSERT INTO tags SET user_id = ?, file_name = ?, address_id = ?, event_id = ?, src = ?, thumbnail_src = ?,  public_s3_url= ?, meta = ?, date_time = ?, sync_id = ?`, // ehh date_time
+            [userId,  imageData.fileName, imageData.addressId, imgCopy.eventId, buff, thumbnailBuff, imagePublicS3Url, JSON.stringify(imageData.meta), imgCopy.datetime, syncId],
             (err, res) => {
                 if (err) {
                     console.log(err);
