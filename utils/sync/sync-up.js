@@ -4,6 +4,7 @@ const { pool } = require('./../../utils/db/dbConnect');
 const { getDateTime } = require('./../../utils/datetime/functions');
 const { uploadToS3 } = require('./../../utils/s3/uploadTag');
 const { generateBuffer } = require('./sync-utils');
+const { makeRandomStr } = require('./../misc/stringGenerator');
 
 // import s3 stuff from module later
 const AWS = require('aws-sdk');
@@ -86,7 +87,7 @@ const insertTags = async (userId, syncId, tags) => {
         const buff = generateBuffer(tagRow.src);
         const uploadParams = {
             Bucket: bucketName,
-            Key: userId + '_' + tagRow.fileName, // this could be bad since there can be spaces in file names, although public display doesn't matter i.e. S3
+            Key: userId + '_' + makeRandomStr(24) + '_' + tagRow.fileName, // this could be bad since there can be spaces in file names, although public display doesn't matter i.e. S3
             Body: buff,
             ACL: 'public-read',
             ContentEncoding: 'base64',

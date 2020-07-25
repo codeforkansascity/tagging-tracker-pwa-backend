@@ -3,6 +3,7 @@ const { getUserIdFromToken } = require('./../users/userFunctions');
 const { pool } = require('./../../utils/db/dbConnect');
 const { uploadToS3 } = require('./../../utils/s3/uploadTag');
 const { getDateTime } = require('./../../utils/datetime/functions');
+const { makeRandomStr } = require('./../misc/stringGenerator');
 
 // import s3 stuff from module later
 const AWS = require('aws-sdk');
@@ -63,7 +64,7 @@ const uploadTags = async (req, res) => {
             const buf = new Buffer.from(image.src.replace(/^data:image\/\w+;base64,/, ""), 'base64');
             const uploadParams = {
                 Bucket: bucketName,
-                Key: userId + '_' + image.fileName, // this could be bad since there can be spaces in file names
+                Key: userId + '_' + makeRandomStr(24) + '_' + image.fileName, // this could be bad since there can be spaces in file names
                 Body: buf,
                 ACL: 'public-read',
                 ContentEncoding: 'base64',
