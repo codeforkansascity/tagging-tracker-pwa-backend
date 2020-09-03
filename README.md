@@ -42,7 +42,7 @@ The node `aws-sdk` package will try to read/find that file. I just made that fil
 ## References
 #### AWS S3 - assumes you have access to a bucket
 [Creating IAM user](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/) - getting access-secret key(I used console eg. web interface)
-Check out this [summary on IAM and AWS SDK configuration](tagging-tracker-pwa-backend/AWS_CLI_SDK_CONFIG.md)
+Check out this [summary on IAM and AWS SDK configuration](./AWS_CLI_SDK_CONFIG.md)
 
 [JS SDK demo code](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/s3-example-creating-buckets.html) - like upload/list buckets/etc...
 
