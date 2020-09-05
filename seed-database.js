@@ -75,11 +75,14 @@ connection.query(
     'CREATE TABLE `tags` (' +
         '`id` int(11) NOT NULL AUTO_INCREMENT,' +
         '`user_id` int(11) NOT NULL,' +
+        '`file_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,' +
         '`address_id` int(11) NOT NULL,' +
+        '`event_id` int(11) NOT NULL,' +
         '`src` mediumblob NOT NULL,' +
         '`thumbnail_src` mediumblob NOT NULL,' +
         '`public_s3_url` varchar(2083) COLLATE utf8_unicode_ci NOT NULL,' +
         '`meta` text COLLATE utf8_unicode_ci NOT NULL,' +
+        '`date_time` datetime NOT NULL,' +
         '`sync_id` int(11) NOT NULL,' +
         'PRIMARY KEY (`id`)' +
         ') ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci',
