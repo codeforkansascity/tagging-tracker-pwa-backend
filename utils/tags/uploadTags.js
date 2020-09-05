@@ -11,6 +11,8 @@ const bucketName = process.env.AWS_S3_NAME;
 AWS.config.update({region: process.env.AWS_S3_REGION});
 const s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
+const maxFileSize = 16_000_000;
+
 // TODO: add resize image option for thumbnail jimp is possibilty
 // BLOB has max size of 64KB
 const addImageToDatabase = async (userId, imageData, imagePublicS3Url) => {
@@ -50,7 +52,13 @@ const uploadTags = async (req, res) => {
                 break;
             }
 
-            
+            const image = imagesToUpload[i];
+
+            if (image.meta.size >= maxFileSize) {
+                console.log(image.fileName + " was too large of an image to upload.");
+                continue;
+            }
+
             // considerable this is a waste if first insert attempt fails, but saves subsequent requests
             const userId = await getUserIdFromToken(req.body.headers.Authorization.split('Bearer ')[1]);
             if (!userId) {
@@ -60,7 +68,6 @@ const uploadTags = async (req, res) => {
             // plain Buffer is depricated/need to specify size in case secret info released
             // adding user id to filename, seems bad but need way to distinguish between files as it will overwrite/not save
             // if matching file names(Key)
-            const image = imagesToUpload[i];
             const buf = new Buffer.from(image.src.replace(/^data:image\/\w+;base64,/, ""), 'base64');
             const uploadParams = {
                 Bucket: bucketName,

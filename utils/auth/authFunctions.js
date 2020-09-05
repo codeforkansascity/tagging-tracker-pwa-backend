@@ -13,21 +13,19 @@ const loginUser = (req, res) => {
     ) {
         res.status(401).send('No user/pass provided');
     }
-    
+
     const username = req.body.username;
     const password = req.body.password;
 
-    let passwordHash;
-    
     pool.query(
         `SELECT password_hash FROM users WHERE username = ?`,
         [username],
         (err, qres) => {
             if (err) {
-                res.status(401).send('Failed to login');
+                res.status(401).send('Failed to login: ' + JSON.stringify(err));
             } else {
                 if (qres.length && typeof qres[0].password_hash !== "undefined") {
-                    passwordHash = qres[0].password_hash;
+                    let passwordHash = qres[0].password_hash;
                     _comparePasswords(res, username, password, passwordHash);
                 } else {
                     res.status(401).send('Failed to login');
