@@ -21,11 +21,8 @@ if (process.env.NODE_ENV === "live") {
     https = require('https');
     const fs = require('fs');
     https_options = {
-        key: fs.readFileSync(`/etc/ssl/certs/namecheap/${process.env.SSL_CERT_BASE_FILE_NAME}.key`),
-        cert: fs.readFileSync(`/etc/ssl/certs/namecheap/${process.env.SSL_CERT_BASE_FILE_NAME}.crt`),
-        ca: [
-            fs.readFileSync(`/etc/ssl/certs/namecheap/${process.env.SSL_CERT_BASE_FILE_NAME}.ca-bundle`)
-        ],
+        key: fs.readFileSync(`${process.env.PRIV_KEY_FILE_PATH}`),
+        cert: fs.readFileSync(`${process.env.CERT_PEM_FILE_PATH}`),
         secureOptions: constants.SSL_OP_NO_TLSv1 | constants.SSL_OP_NO_TLSv1_1,
         ciphers: JSON.parse(fs.readFileSync(`${process.env.CIPHERS_FILE_PATH}`)).join(':'),
     }
