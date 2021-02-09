@@ -1,6 +1,7 @@
 require('dotenv').config({
     path: __dirname + '/.env'
 });
+const { constants } = require('crypto');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
@@ -24,9 +25,12 @@ if (process.env.NODE_ENV === "live") {
         cert: fs.readFileSync(`/etc/ssl/certs/namecheap/${process.env.SSL_CERT_BASE_FILE_NAME}.crt`),
         ca: [
             fs.readFileSync(`/etc/ssl/certs/namecheap/${process.env.SSL_CERT_BASE_FILE_NAME}.ca-bundle`)
-        ]
+        ],
+        secureOptions: constants.SSL_OP_NO_TLSv1 | constants.SSL_OP_NO_TLSv1_1,
+        ciphers: JSON.parse(fs.readFileSync(`${process.env.CIPHERS_FILE_PATH}`)).join(':'),
     }
 
+    // not working
     // logging - https://stackoverflow.com/questions/8393636/node-log-in-a-file-instead-of-the-console
     const util = require('util');
     const log_file = fs.createWriteStream(process.env.LOG_PATH + '/tagging_tracker_api.log', {flags : 'w'});
