@@ -22,7 +22,7 @@ if (process.env.NODE_ENV === "live") {
     const fs = require('fs');
     https_options = {
         key: fs.readFileSync(`${process.env.PRIV_KEY_FILE_PATH}`),
-        cert: fs.readFileSync(`${process.env.CERT_PEM_FILE_PATH}`),
+        cert: fs.readFileSync(`${process.env.FULL_CHAIN_PEM_FILE_PATH}`),
         secureOptions: constants.SSL_OP_NO_TLSv1 | constants.SSL_OP_NO_TLSv1_1,
         ciphers: JSON.parse(fs.readFileSync(`${process.env.CIPHERS_FILE_PATH}`)).join(':'),
     }
