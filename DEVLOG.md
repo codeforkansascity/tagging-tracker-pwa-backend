@@ -1,3 +1,7 @@
+### 05/06/2021
+Adding note about server SSL stuff
+Need to check in 3 months if the cert bot succeeds. NGINX is running port 80, PM2 is running 443 for the API
+
 ### 05/05/2021
 See what's wrong with the events sync, they're not syncing up
 
