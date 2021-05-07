@@ -24,6 +24,9 @@ Just changed password on the box from default
   - made the file, moved it over to `/etc/nginx` was able to restart server have ssl
   - at this point have an SSL enabled site hopefully A or A+ rating in Qualys SSL Labs
   - note about not using TLS 1/1.1
+- note: in the end you don't actually use the NGINX server as that would be for static files
+  - the API is ran by Node with PM2, it will use the generated certs... I believe the NGINX setup is good
+  - for the automatic update as one of the methods needs a port 80 for lets encrypt to hit for verification
 
 #### Getting code to run
 - install deps
@@ -36,9 +39,17 @@ Just changed password on the box from default
 - clone repo, npm install
 - fill out rest of env like AWS related
 - do AWS config
+  - if you have problems with the AWS CLI not being detected (credentials)
+    - can pull directly from `.env` file see [here](https://stackoverflow.com/a/62722544/2710227)
 - run app with pm2
+  - pm2 covered [here](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-debian-8)
+    - ran into a problem with the accessing of cert files in `/etc/letsencrypt/live` had to give it a `chmod 755`
+    - also the `index.js` is using full chain for the certs not just a single file doesn't match `.env` but easy to fix
 - test
   - login
   - sync down
   - sync up
   - images make it to AWS S3
+
+### NOTE:
+`console.log` commas do not work, use + to contenate an `err` variable otherwise... you can't tell what's wrong because it's cut off

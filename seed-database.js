@@ -146,4 +146,25 @@ connection.query(
     }
 )
 
+// create events table
+connection.query(
+    'CREATE TABLE `events` (' +
+        '`id` int(11) NOT NULL AUTO_INCREMENT,' +
+        '`user_id` int(11) NOT NULL,' +
+        '`address_id` int(11) NOT NULL,' +
+        '`tag_info_id` int(11) NOT NULL,' +
+        '`tag_ids` text COLLATE utf8_unicode_ci NOT NULL,' +
+        '`datetime` datetime NOT NULL,' +
+        '`sync_id` int(11) NOT NULL,' +
+        'PRIMARY KEY (`id`),' +
+        'KEY `id` (`id`)' +
+        ') ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci',
+    (error, results, fields) => {
+        if (error) {
+            console.log('error creating table events:', error.sqlMessage);
+            return;
+        }
+    }
+)
+
 connection.end();
