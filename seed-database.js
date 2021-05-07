@@ -118,6 +118,7 @@ connection.query(
         '`id` int(11) NOT NULL AUTO_INCREMENT,' +
         '`user_id` int(11) NOT NULL,' +
         '`address_id` int(11) NOT NULL,' +
+        '`event_id` int(11) NOT NULL,' +
         '`form_data` text COLLATE utf8_unicode_ci NOT NULL,' +
         '`sync_id` int(11) NOT NULL,' +
         'PRIMARY KEY (`id`)' +
